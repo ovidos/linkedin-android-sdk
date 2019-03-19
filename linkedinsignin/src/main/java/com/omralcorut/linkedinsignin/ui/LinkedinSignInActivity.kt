@@ -20,9 +20,8 @@ import java.net.URL
 import java.io.*
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
-
-
+import android.os.Build
+import android.support.annotation.RequiresApi
 
 class LinkedinSignInActivity: Activity() {
 
@@ -56,6 +55,18 @@ class LinkedinSignInActivity: Activity() {
         val url = generateUrl()
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                val uri = Uri.parse( url )
+                val authCode = uri.getQueryParameters(CODE).getOrNull(0)
+
+                if (authCode != null) {
+                    getAccessToken(authCode)
+                }
+
+                return super.shouldOverrideUrlLoading(view, url)
+            }
+
+            @RequiresApi(Build.VERSION_CODES.N)
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val authCode = request.url.getQueryParameters(CODE).getOrNull(0)
 
