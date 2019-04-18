@@ -16,7 +16,8 @@ class MainActivity : AppCompatActivity() {
             clientId = "LINKEDIN_CLIENT_ID",
             clientSecret = "LINKEDIN_CLIENT_SECRET",
             redirectUri = "LINKEDIN_REDIRECT_URI",
-            state = "RANDOM_STRING")
+            state = "RANDOM_STRING",
+            scopes = listOf("r_liteprofile", "r_emailaddress"))
 
         Linkedin.login(this, object : LinkedinLoginViewResponseListener {
             override fun linkedinDidLoggedIn(linkedinToken: LinkedinToken) {

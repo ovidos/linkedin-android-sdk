@@ -32,6 +32,7 @@ class LinkedinSignInActivity: Activity() {
     private var clientSecret: String? = null
     private var redirectUri: String? = null
     private var state: String? = null
+    private var scope: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +47,7 @@ class LinkedinSignInActivity: Activity() {
         clientSecret = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.CLIENT_SECRET, null)
         redirectUri = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.REDIRECT_URI, null)
         state = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.STATE, null)
+        scope = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.SCOPE, "r_liteprofile%20r_emailaddress")
 
         initWebView()
     }
@@ -88,6 +90,7 @@ class LinkedinSignInActivity: Activity() {
                 .appendQueryParameter(CLIENT_ID, this.clientId)
                 .appendQueryParameter(REDIRECT_URI, this.redirectUri)
                 .appendQueryParameter(STATE, this.state)
+                .appendQueryParameter(SCOPE, this.scope)
                 .build().toString()
     }
 
@@ -182,6 +185,7 @@ class LinkedinSignInActivity: Activity() {
         private const val CLIENT_ID = "client_id"
         private const val REDIRECT_URI = "redirect_uri"
         private const val STATE = "state"
+        private const val SCOPE = "scope"
         private const val CODE = "code"
         private const val GRANT_TYPE = "grant_type"
         private const val AUTHORIZATION_CODE = "authorization_code"

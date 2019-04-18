@@ -17,7 +17,7 @@ Add it in your root build.gradle at the end of repositories:
 
 Add the dependency:
 
-`implementation 'com.github.ovidos:linkedin-android-sdk:0.1.1'`
+`implementation 'com.github.ovidos:linkedin-android-sdk:0.1.2'`
 
 For login flow to work, LinkedinSignInActivity needs to be added to AndroidManifest.xml:
 
@@ -43,7 +43,8 @@ First of all you need to retrieve Client ID, Client Secret and Redirect Uri from
             	clientId = "LINKEDIN_CLIENT_ID",
             	clientSecret = "LINKEDIN_CLIENT_SECRET",
             	redirectUri = "LINKEDIN_REDIRECT_URI",
-            	state = "RANDOM_STRING")
+            	state = "RANDOM_STRING",
+            	scopes = listOf("r_liteprofile", "r_emailaddress"))
               
 // Java
 
@@ -51,7 +52,8 @@ First of all you need to retrieve Client ID, Client Secret and Redirect Uri from
                 	"LINKEDIN_CLIENT_ID",
                 	"LINKEDIN_CLIENT_SECRET",
                 	"LINKEDIN_REDIRECT_URI",
-                	"RANDOM_STRING");
+                	"RANDOM_STRING",
+                	Arrays.asList("r_liteprofile", "r_emailaddress"));
             
 "State" is a unique string of your choice designed to protect against CSRF attacks.
 

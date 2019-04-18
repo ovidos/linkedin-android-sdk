@@ -8,5 +8,6 @@ class Constants {
         const val CLIENT_SECRET = "com.omralcorut.linkedinsignin.client_secret"
         const val REDIRECT_URI = "com.omralcorut.linkedinsignin.redirect_uri"
         const val STATE = "com.omralcorut.linkedinsignin.state"
+        const val SCOPE = "com.omralcorut.linkedinsignin.scope"
     }
 }

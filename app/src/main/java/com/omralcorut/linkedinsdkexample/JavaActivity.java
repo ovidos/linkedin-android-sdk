@@ -7,6 +7,7 @@ import com.omralcorut.linkedinsignin.Linkedin;
 import com.omralcorut.linkedinsignin.LinkedinLoginViewResponseListener;
 import com.omralcorut.linkedinsignin.model.LinkedinToken;
 import org.jetbrains.annotations.NotNull;
+import java.util.Arrays;
 
 public class JavaActivity extends AppCompatActivity {
 
@@ -19,7 +20,8 @@ public class JavaActivity extends AppCompatActivity {
                 "LINKEDIN_CLIENT_ID",
                 "LINKEDIN_CLIENT_SECRET",
                 "LINKEDIN_REDIRECT_URI",
-                "RANDOM_STRING");
+                "RANDOM_STRING",
+                Arrays.asList("r_liteprofile", "r_emailaddress"));
 
         Linkedin.Companion.login(this, new LinkedinLoginViewResponseListener() {
             @Override
