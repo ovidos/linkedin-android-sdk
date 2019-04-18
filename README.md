@@ -17,7 +17,7 @@ Add it in your root build.gradle at the end of repositories:
 
 Add the dependency:
 
-`implementation 'com.github.ovidos:linkedin-android-sdk:0.1.3'`
+`implementation 'com.github.ovidos:linkedin-android-sdk:0.1.4'`
 
 For login flow to work, LinkedinSignInActivity needs to be added to AndroidManifest.xml:
 
