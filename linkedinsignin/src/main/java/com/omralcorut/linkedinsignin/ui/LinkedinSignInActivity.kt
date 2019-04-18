@@ -32,8 +32,9 @@ class LinkedinSignInActivity: Activity() {
     private var clientSecret: String? = null
     private var redirectUri: String? = null
     private var state: String? = null
-    private var scope: String? = null
+    private var scopes: List<String>? = null
 
+    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_linkedin_sign_in)
@@ -47,7 +48,7 @@ class LinkedinSignInActivity: Activity() {
         clientSecret = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.CLIENT_SECRET, null)
         redirectUri = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.REDIRECT_URI, null)
         state = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.STATE, null)
-        scope = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.SCOPE, "r_liteprofile%20r_emailaddress")
+        scopes = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getStringSet(Constants.SCOPE, mutableSetOf("r_liteprofile")).toList()
 
         initWebView()
     }
@@ -84,14 +85,20 @@ class LinkedinSignInActivity: Activity() {
     }
 
     private fun generateUrl(): String {
-        return Uri.parse(AUTHORIZATION_URL)
-                .buildUpon()
-                .appendQueryParameter(RESPONSE_TYPE, CODE)
-                .appendQueryParameter(CLIENT_ID, this.clientId)
-                .appendQueryParameter(REDIRECT_URI, this.redirectUri)
-                .appendQueryParameter(STATE, this.state)
-                .appendQueryParameter(SCOPE, this.scope)
-                .build().toString()
+        val uriBuilder = Uri.parse(AUTHORIZATION_URL)
+            .buildUpon()
+            .appendQueryParameter(RESPONSE_TYPE, CODE)
+            .appendQueryParameter(CLIENT_ID, this.clientId)
+            .appendQueryParameter(REDIRECT_URI, this.redirectUri)
+            .appendQueryParameter(STATE, this.state)
+
+        this.scopes?.let {
+            for (scope in it) {
+                uriBuilder.appendQueryParameter(SCOPE, scope)
+            }
+        }
+
+        return uriBuilder.build().toString()
     }
 
     fun getAccessToken(authCode: String) {

@@ -18,7 +18,7 @@ class Linkedin {
             editor?.putString(Constants.CLIENT_SECRET, clientSecret)
             editor?.putString(Constants.REDIRECT_URI, redirectUri)
             editor?.putString(Constants.STATE, state)
-            editor?.putString(Constants.SCOPE, getScopes(scopes))
+            editor?.putStringSet(Constants.SCOPE, scopes.toMutableSet())
             editor?.apply()
         }
 
@@ -26,15 +26,6 @@ class Linkedin {
             this.linkedinLoginViewResponseListener = listener
             val loginActivity = Intent(context, LinkedinSignInActivity::class.java)
             context?.startActivity(loginActivity)
-        }
-
-        private fun getScopes(scopes: List<String>): String {
-            var scopesString: String = ""
-            for (scope in scopes) {
-                scopesString += "$scope&"
-            }
-            scopesString = scopesString.dropLast(1)
-            return scopesString
         }
     }
 }
