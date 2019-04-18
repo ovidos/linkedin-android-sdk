@@ -85,20 +85,23 @@ class LinkedinSignInActivity: Activity() {
     }
 
     private fun generateUrl(): String {
-        val uriBuilder = Uri.parse(AUTHORIZATION_URL)
+        return Uri.parse(AUTHORIZATION_URL)
             .buildUpon()
             .appendQueryParameter(RESPONSE_TYPE, CODE)
             .appendQueryParameter(CLIENT_ID, this.clientId)
             .appendQueryParameter(REDIRECT_URI, this.redirectUri)
             .appendQueryParameter(STATE, this.state)
+            .appendQueryParameter(SCOPE, getScopes()).build().toString()
+    }
 
+    private fun getScopes(): String {
+        var scopeString = ""
         this.scopes?.let {
             for (scope in it) {
-                uriBuilder.appendQueryParameter(SCOPE, scope)
+                scopeString += "$scope "
             }
         }
-
-        return uriBuilder.build().toString()
+        return scopeString.dropLast(1)
     }
 
     fun getAccessToken(authCode: String) {
