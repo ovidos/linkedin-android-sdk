@@ -60,8 +60,17 @@ class LinkedinSignInActivity: Activity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 val uri = Uri.parse( url )
-                val authCode = uri.getQueryParameters(CODE).getOrNull(0)
 
+                val error = uri.getQueryParameters(ERROR).getOrNull(0)
+                if (error != null) {
+                    finish()
+                    runOnUiThread {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
+                    return false
+                }
+
+                val authCode = uri.getQueryParameters(CODE).getOrNull(0)
                 if (authCode != null) {
                     getAccessToken(authCode)
                 }
@@ -71,8 +80,16 @@ class LinkedinSignInActivity: Activity() {
 
             @RequiresApi(Build.VERSION_CODES.N)
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                val authCode = request.url.getQueryParameters(CODE).getOrNull(0)
+                val error = request.url.getQueryParameters(ERROR).getOrNull(0)
+                if (error != null) {
+                    finish()
+                    runOnUiThread {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
+                    return false
+                }
 
+                val authCode = request.url.getQueryParameters(CODE).getOrNull(0)
                 if (authCode != null) {
                     getAccessToken(authCode)
                 }
@@ -197,6 +214,8 @@ class LinkedinSignInActivity: Activity() {
         private const val STATE = "state"
         private const val SCOPE = "scope"
         private const val CODE = "code"
+        private const val ERROR = "error"
+        private const val ERROR_DESCRIPTION = "error_description"
         private const val GRANT_TYPE = "grant_type"
         private const val AUTHORIZATION_CODE = "authorization_code"
         private const val CLIENT_SECRET = "client_secret"
