@@ -64,9 +64,7 @@ class LinkedinSignInActivity: Activity() {
                 val error = uri.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    runOnUiThread {
-                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
-                    }
+                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
                     return false
                 }
 
@@ -83,9 +81,7 @@ class LinkedinSignInActivity: Activity() {
                 val error = request.url.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    runOnUiThread {
-                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
-                    }
+                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
                     return false
                 }
 
