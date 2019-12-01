@@ -77,7 +77,9 @@ class LinkedinSignInActivity: Activity() {
                 val error = uri.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    if (isNotLoggedIn) {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
                     return false
                 }
 
@@ -94,7 +96,9 @@ class LinkedinSignInActivity: Activity() {
                 val error = request.url.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    if (isNotLoggedIn) {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
                     return false
                 }
 
@@ -179,6 +183,7 @@ class LinkedinSignInActivity: Activity() {
 
                 conn.disconnect()
                 if (response.has("access_token")) {
+                    isNotLoggedIn = false
                     finish()
                     runOnUiThread {
                         Linkedin.linkedinLoginViewResponseListener?.linkedinDidLoggedIn(
@@ -186,8 +191,10 @@ class LinkedinSignInActivity: Activity() {
                     }
                 } else {
                     finish()
-                    runOnUiThread {
-                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(response.getString("error_description"))
+                    if (isNotLoggedIn) {
+                        runOnUiThread {
+                            Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(response.getString("error_description"))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -197,6 +204,8 @@ class LinkedinSignInActivity: Activity() {
 
         thread.start()
     }
+
+    private var isNotLoggedIn = true
 
     @Throws(UnsupportedEncodingException::class)
     private fun getDataString(params: HashMap<String, String?>): String {
