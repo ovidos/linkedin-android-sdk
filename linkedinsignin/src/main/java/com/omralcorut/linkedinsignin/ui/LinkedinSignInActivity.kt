@@ -19,9 +19,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.io.*
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
+import android.webkit.CookieSyncManager
+
+
 
 class LinkedinSignInActivity: Activity() {
 
@@ -48,14 +50,25 @@ class LinkedinSignInActivity: Activity() {
         clientSecret = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.CLIENT_SECRET, null)
         redirectUri = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.REDIRECT_URI, null)
         state = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getString(Constants.STATE, null)
-        scopes = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getStringSet(Constants.SCOPE, mutableSetOf("r_liteprofile")).toList()
+        scopes = getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE).getStringSet(Constants.SCOPE, mutableSetOf("r_liteprofile"))?.toList()
 
         initWebView()
+    }
+
+    private fun clearCookieBeforeAuthorization() {
+        val cookieSyncMngr = CookieSyncManager.createInstance(this)
+        cookieSyncMngr.startSync()
+        val cookieManager = android.webkit.CookieManager.getInstance()
+        cookieManager.removeAllCookie()
+        cookieManager.removeSessionCookie()
+        cookieSyncMngr.stopSync()
+        cookieSyncMngr.sync()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() {
         val url = generateUrl()
+        clearCookieBeforeAuthorization()
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
@@ -64,7 +77,9 @@ class LinkedinSignInActivity: Activity() {
                 val error = uri.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    if (isNotLoggedIn) {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(uri.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
                     return false
                 }
 
@@ -81,7 +96,9 @@ class LinkedinSignInActivity: Activity() {
                 val error = request.url.getQueryParameters(ERROR).getOrNull(0)
                 if (error != null) {
                     finish()
-                    Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    if (isNotLoggedIn) {
+                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(request.url.getQueryParameters(ERROR_DESCRIPTION).getOrNull(0)?:"")
+                    }
                     return false
                 }
 
@@ -123,14 +140,14 @@ class LinkedinSignInActivity: Activity() {
         val thread = Thread(Runnable {
             try {
                 val inputs = hashMapOf(
-                        GRANT_TYPE to AUTHORIZATION_CODE,
-                        CODE to authCode,
-                        REDIRECT_URI to this.redirectUri,
-                        CLIENT_ID to this.clientId,
-                        CLIENT_SECRET to this.clientSecret)
+                    GRANT_TYPE to AUTHORIZATION_CODE,
+                    CODE to authCode,
+                    REDIRECT_URI to this.redirectUri,
+                    CLIENT_ID to this.clientId,
+                    CLIENT_SECRET to this.clientSecret)
                 val inputsString = getDataString(inputs)
 
-                val postData = inputsString.toByteArray(StandardCharsets.UTF_8)
+                val postData = inputsString.toByteArray()
                 val postDataLength = postData.size
 
                 val urlString = (ACCESS_TOKEN_URL)
@@ -166,15 +183,18 @@ class LinkedinSignInActivity: Activity() {
 
                 conn.disconnect()
                 if (response.has("access_token")) {
+                    isNotLoggedIn = false
                     finish()
                     runOnUiThread {
                         Linkedin.linkedinLoginViewResponseListener?.linkedinDidLoggedIn(
-                                LinkedinToken(response.getString("access_token"), response.getLong("expires_in")))
+                            LinkedinToken(response.getString("access_token"), response.getLong("expires_in")))
                     }
                 } else {
                     finish()
-                    runOnUiThread {
-                        Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(response.getString("error_description"))
+                    if (isNotLoggedIn) {
+                        runOnUiThread {
+                            Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(response.getString("error_description"))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -184,6 +204,8 @@ class LinkedinSignInActivity: Activity() {
 
         thread.start()
     }
+
+    private var isNotLoggedIn = true
 
     @Throws(UnsupportedEncodingException::class)
     private fun getDataString(params: HashMap<String, String?>): String {
