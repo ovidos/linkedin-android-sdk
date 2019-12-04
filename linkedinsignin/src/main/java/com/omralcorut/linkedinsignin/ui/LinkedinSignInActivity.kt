@@ -6,9 +6,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import com.omralcorut.linkedinsignin.Linkedin
 import com.omralcorut.linkedinsignin.R
@@ -20,9 +17,8 @@ import java.net.URL
 import java.io.*
 import java.net.URLEncoder
 import android.os.Build
+import android.webkit.*
 import androidx.annotation.RequiresApi
-import android.webkit.CookieSyncManager
-
 
 
 class LinkedinSignInActivity: Activity() {
@@ -109,6 +105,13 @@ class LinkedinSignInActivity: Activity() {
 
                 return super.shouldOverrideUrlLoading(view, request)
             }
+
+            override fun onReceivedError( view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                finish()
+                Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(PAGE_CANT_LOADING_MESSAGE)
+            }
+
         }
 
         webView.loadUrl(url)
@@ -237,5 +240,7 @@ class LinkedinSignInActivity: Activity() {
         private const val GRANT_TYPE = "grant_type"
         private const val AUTHORIZATION_CODE = "authorization_code"
         private const val CLIENT_SECRET = "client_secret"
+
+        private const val PAGE_CANT_LOADING_MESSAGE = "LinkedIn cannot be loaded"
     }
 }
