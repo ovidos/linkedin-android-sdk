@@ -106,8 +106,15 @@ class LinkedinSignInActivity: Activity() {
                 return super.shouldOverrideUrlLoading(view, request)
             }
 
+            @RequiresApi(Build.VERSION_CODES.M)
             override fun onReceivedError( view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 super.onReceivedError(view, request, error)
+                finish()
+                Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(PAGE_CANT_LOADING_MESSAGE)
+            }
+
+            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+                super.onReceivedError(view, errorCode, description, failingUrl)
                 finish()
                 Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(PAGE_CANT_LOADING_MESSAGE)
             }
@@ -226,6 +233,15 @@ class LinkedinSignInActivity: Activity() {
         return result.toString()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (isNotLoggedIn) {
+            runOnUiThread {
+                Linkedin.linkedinLoginViewResponseListener?.linkedinLoginDidFail(SIGNIN_CANCELED_MESSAGE)
+            }
+        }
+    }
+
     companion object {
         private const val AUTHORIZATION_URL = "https://www.linkedin.com/oauth/v2/authorization"
         private const val ACCESS_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken"
@@ -242,5 +258,6 @@ class LinkedinSignInActivity: Activity() {
         private const val CLIENT_SECRET = "client_secret"
 
         private const val PAGE_CANT_LOADING_MESSAGE = "LinkedIn cannot be loaded"
+        private const val SIGNIN_CANCELED_MESSAGE = "LinkedIn sign in has been canceled"
     }
 }
